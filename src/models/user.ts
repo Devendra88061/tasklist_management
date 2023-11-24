@@ -30,6 +30,9 @@ const userSchema = new mongoose.Schema({
     role:{
         type: String,
         required: false
+    },
+    token:{
+        type: String,
     }
 });
 // Create the user model

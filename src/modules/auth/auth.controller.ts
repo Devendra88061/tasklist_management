@@ -69,8 +69,8 @@ class authController {
         console.log("userData---", userData);
         const token = jwt.sign({ userName: userData.userName }, JWT_SECRET);
         console.log("token---", token);
-        // userData.token = token;
-        return (token);
+        userData.token = token;
+        return {userData};
       } else {
         return "Invalid password please re-entered correct password";
       }
