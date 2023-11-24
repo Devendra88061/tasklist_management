@@ -13,9 +13,6 @@ const authToken = 'fccedd51d35d8b45b5cfa88fd373ce07';
 const twilioPhone = '+12767794333';
 
 class authController {
-  client: any;
-  static client: any;
-
   // SignUp
   public static async signUpUser(request: any, response: any) {
     const { userName, password, qualification, city, phoneNumber, role } = request.body;
@@ -44,7 +41,7 @@ class authController {
           message: "User created successfully",
           data: newUser,
         });
-        authController.sendOtp(phoneNumber, response);
+        // authController.sendOtp(phoneNumber, response);
       }
     } catch (error) {
       console.error(error);
@@ -170,9 +167,9 @@ class authController {
     }
   }
 
-// We are sending the otp on mobile number but 
-// On task there is no further process for the otp verification 
-// we are using username and password 
+  // We are sending the otp on mobile number but 
+  // On task there is no further process for the otp verification 
+  // we are using username and password for login api
 
   public static async sendOtp(phone: any, response: any) {
     var client = twilio(accountSid, authToken);
@@ -180,7 +177,7 @@ class authController {
     const otp = this.generateOTP();
 
     // Send OTP via Twilio
-    this.client.messages
+    client.messages
       .create({
         body: `Your OTP is: ${otp}`,
         from: twilioPhone,
@@ -194,7 +191,7 @@ class authController {
         console.error(error);
         response.status(500).send('Error sending OTP');
       });
-  }static generateOTP() {
+  } static generateOTP() {
     throw new Error("Method not implemented.");
   };
   generateOTP = () => {
