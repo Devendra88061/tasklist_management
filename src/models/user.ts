@@ -15,11 +15,11 @@ const userSchema = new mongoose.Schema({
         required: false,
         unique: true,
     },
-    qualification:{
+    qualification: {
         type: String,
         required: false,
     },
-    city:{
+    city: {
         type: String,
         required: true,
     },
@@ -27,10 +27,16 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    role:{
+    role: {
+        type: String,
+        enum: ['admin', 'guestUser'],
+        required: true
+    },
+    url: {
         type: String,
         required: false
     }
+
 });
 // Create the user model
 const user = mongoose.model("user", userSchema);
