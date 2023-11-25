@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false
     }
-
 });
 // Create the user model
 const user = mongoose.model("user", userSchema);
