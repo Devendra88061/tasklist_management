@@ -41,3 +41,8 @@ The folder structure of this Book_management is explained below:
 # Add link Api
 - http://localhost:4000/auth/addUrl
 
+
+# Note :
+- im using the twilio third party api for sending the otp verification process if user want to check the
+- verify otp functionality user need to verify the mobileNo on twilio account because we are using free
+- Account for this verification process.

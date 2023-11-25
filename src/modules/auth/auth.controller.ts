@@ -3,18 +3,24 @@ import bcrypt from "bcrypt";
 import user from "../../models/user";
 import { userRole } from "../../enum/enum";
 export const JWT_SECRET = "axcdremsXvT";
-import twilio from "twilio";
 
 export const loggedInUsers: Array<string> = [];
 
 // Twilio credentials
-const accountSid = 'AC4dd4eae08c4d763594eb7d55ddb1e5e8';
-const authToken = 'fccedd51d35d8b45b5cfa88fd373ce07';
-const twilioPhone = '+12767794333';
+const accountSid = "AC4dd4eae08c4d763594eb7d55ddb1e5e8";
+const authToken = "aa390a53f88cf14073be8a7cae7b21f5";
+const twilioPhone = "+12767794333";
 
+const client = require("twilio")(accountSid, authToken);
+let OTP: any;
+let newUser: any;
 class authController {
-  client: any;
-  static client: any;
+
+  /* # Note :
+   * - we are using the twilio third party api for sending the otp verification process if user want to check the
+   * - verify otp functionality user need to verify the mobileNo on twilio account because we are using free
+   * - Account for this verification process. 
+   */
 
   // SignUp
   public static async signUpUser(request: any, response: any) {
@@ -34,17 +40,57 @@ class authController {
             message: "Required fields are missing",
           });
         }
-        const newUser = new user({
+        newUser = new user({
           userName, password, qualification, city, phoneNumber, role
         });
-        const hash = await bcrypt.hash(password, 17);
-        newUser.password = hash;
+
+        let digits = "0123456789";
+        OTP = "";
+        for (let i = 0; i < 4; i++) {
+          OTP += digits[Math.floor(Math.random() * 10)];
+        }
+        console.log("phoneNumber--", phoneNumber);
+        // Send OTP to the user
+        await client.messages.create({
+          body: `Your OTP from taskManagement is ${OTP}`,
+          to: phoneNumber,
+          from: twilioPhone
+        })
+          .then(() => {
+            response.status(200).json({
+              message: "OTP sent to your phone number",
+            })
+          });
+      }
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({
+        message: "Internal server error"
+      });
+    }
+  };
+
+  // Verify Otp 
+  public static async verifyOtp(request: any, response: any) {
+    const { otp } = request.body;
+    try {
+      if (!otp) {
+        response.status(400).send({
+          message: "OTP is required"
+        });
+      } else {
+        if (otp != OTP) {
+          return response.status(400).json({
+            message: "Incorrect OTP.",
+          })
+        }
+        // const hash = await bcrypt.hash(password, 17);
+        // newUser.password = hash;
         await newUser.save();
         response.status(201).json({
           message: "User created successfully",
           data: newUser,
         });
-        authController.sendOtp(phoneNumber, response);
       }
     } catch (error) {
       console.error(error);
@@ -90,7 +136,8 @@ class authController {
       });
     }
   }
-  // logout Api
+
+  // logout 
   public static async logout(request: any, response: any) {
     try {
       const token = request.header('Authorization');
@@ -168,37 +215,6 @@ class authController {
         message: "Internal server error"
       });
     }
-  }
-
-// We are sending the otp on mobile number but 
-// On task there is no further process for the otp verification 
-// we are using username and password 
-
-  public static async sendOtp(phone: any, response: any) {
-    var client = twilio(accountSid, authToken);
-    const phoneNumber = phone;
-    const otp = this.generateOTP();
-
-    // Send OTP via Twilio
-    this.client.messages
-      .create({
-        body: `Your OTP is: ${otp}`,
-        from: twilioPhone,
-        to: phoneNumber,
-      })
-      .then((message: any) => {
-        console.log(message.sid);
-        response.send('OTP sent successfully');
-      })
-      .catch((error: any) => {
-        console.error(error);
-        response.status(500).send('Error sending OTP');
-      });
-  }static generateOTP() {
-    throw new Error("Method not implemented.");
-  };
-  generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000);
   }
 }
 export default authController;
